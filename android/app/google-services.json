@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "813740347156",
+    "project_id": "ykshelper-reel",
+    "storage_bucket": "ykshelper-reel.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:813740347156:android:9820b88b2a3c795bedbc01",
+        "android_client_info": {
+          "package_name": "com.kyaa.yks_helper"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "813740347156-ccegm5udraak6s8aiieilib79ujpsqgl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBiH-a_OHR9x7XCPxWON134YcxGWOmEgxY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "813740347156-ccegm5udraak6s8aiieilib79ujpsqgl.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
