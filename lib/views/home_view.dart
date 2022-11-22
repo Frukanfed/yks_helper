@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:yks_helper/constants/routes.dart';
 import 'package:yks_helper/services/auth/auth_service.dart';
+import 'package:yks_helper/services/crud/yks_service.dart';
 import '../enums/menu_action.dart';
 
 class HomeView extends StatefulWidget {
@@ -11,38 +12,72 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
+  late final HelperService _helperService;
+  String get userEmail => AuthService.firebase().currentUser!.email!;
+
+  @override
+  void initState() {
+    _helperService = HelperService();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _helperService.close();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Ana Menü'),
-        actions: [
-          PopupMenuButton<MenuAction>(
-            onSelected: (value) async {
-              switch (value) {
-                case MenuAction.logout:
-                  final shouldLogOut = await showLogOutDialog(context);
-                  if (shouldLogOut) {
-                    await AuthService.firebase().logOut();
-                    Navigator.of(context).pushNamedAndRemoveUntil(
-                      loginRoute,
-                      (_) => false,
-                    );
-                  }
-                  break;
-              }
-            },
-            itemBuilder: (context) {
-              return const [
-                PopupMenuItem<MenuAction>(
-                    value: MenuAction.logout, child: Text('Log Out'))
-              ];
-            },
-          )
-        ],
-      ),
-      body: const Text('sa'),
-    );
+        appBar: AppBar(
+          title: const Text('Ana Menü'),
+          actions: [
+            PopupMenuButton<MenuAction>(
+              onSelected: (value) async {
+                switch (value) {
+                  case MenuAction.logout:
+                    final shouldLogOut = await showLogOutDialog(context);
+                    if (shouldLogOut) {
+                      await AuthService.firebase().logOut();
+                      Navigator.of(context).pushNamedAndRemoveUntil(
+                        loginRoute,
+                        (_) => false,
+                      );
+                    }
+                    break;
+                }
+              },
+              itemBuilder: (context) {
+                return const [
+                  PopupMenuItem<MenuAction>(
+                      value: MenuAction.logout, child: Text('Log Out'))
+                ];
+              },
+            )
+          ],
+        ),
+        body: FutureBuilder(
+          future: _helperService.getOrCreateUser(email: userEmail),
+          builder: (context, snapshot) {
+            switch (snapshot.connectionState) {
+              case ConnectionState.done:
+                return StreamBuilder(
+                  stream: _helperService.allNotes,
+                  builder: (context, snapshot) {
+                    switch (snapshot.connectionState) {
+                      case ConnectionState.waiting:
+                        return const Text('Waiting Questions');
+                      default:
+                        return const CircularProgressIndicator();
+                    }
+                  },
+                );
+              default:
+                return const CircularProgressIndicator();
+            }
+          },
+        ));
   }
 }
 

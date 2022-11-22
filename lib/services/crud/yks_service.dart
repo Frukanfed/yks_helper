@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' show join;
@@ -8,30 +10,75 @@ import 'crud_exceptions.dart';
 class HelperService {
   Database? _db;
 
+  List<DataBaseQuestions> _questions = [];
+
+  static final _shared = HelperService._sharedInstance();
+  HelperService._sharedInstance();
+  factory HelperService() => _shared;
+
+  final _questionsStreamController =
+      StreamController<List<DataBaseQuestions>>.broadcast();
+
+  Stream<List<DataBaseQuestions>> get allNotes =>
+      _questionsStreamController.stream;
+
+  Future<DataBaseUser> getOrCreateUser({required String email}) async {
+    try {
+      final user = await getUser(email: email);
+      return user;
+    } on CouldNotFindUserException {
+      final createdUser = await createUser(email: email);
+      return createdUser;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> _cacheQuestions() async {
+    final allQuestions = await getSameTypeQuestions(type: 'all');
+    _questions = allQuestions.toList();
+    _questionsStreamController.add(_questions);
+  }
+
   Future<DataBaseQuestions> updateQuestion({
     required DataBaseQuestions question,
     required String text,
   }) async {
+    await _ensureDbIsOpen();
     final db = _getDataBaseOrThrow();
 
+    //make sure question exists
     await getQuestion(id: question.id);
+
+    //update DB
     final updatesCount = await db.update(questionsTable, {
       textColumn: text,
       isSyncedWithCloudColumn: 0,
     });
 
     if (updatesCount == 0) throw CouldNotUpdateNoteException();
-    return await getQuestion(id: question.id);
+    final updatedQuestion = await getQuestion(id: question.id);
+    _questions.removeWhere((question) => question.id == updatedQuestion.id);
+    _questions.add(updatedQuestion);
+    _questionsStreamController.add(_questions);
+    return updatedQuestion;
   }
 
   Future<Iterable<DataBaseQuestions>> getSameTypeQuestions(
       {required String type}) async {
+    await _ensureDbIsOpen();
     final db = _getDataBaseOrThrow();
-    final questions = await db.query(
-      questionsTable,
-      where: 'type = ?',
-      whereArgs: [type],
-    );
+    List<Map<String, Object?>> questions;
+
+    if (type == 'all') {
+      questions = await db.query(questionsTable);
+    } else {
+      questions = await db.query(
+        questionsTable,
+        where: 'type = ?',
+        whereArgs: [type],
+      );
+    }
 
     return questions
         .map((questionsRow) => DataBaseQuestions.fromRow(questionsRow));
@@ -47,26 +94,42 @@ class HelperService {
     );
 
     if (question.isEmpty) throw CouldNotDeleteQuestionException();
-    return DataBaseQuestions.fromRow(question.first);
+    final updateQuestion = DataBaseQuestions.fromRow(question.first);
+    _questions.removeWhere((newQuestion) => newQuestion.id == id);
+    _questions.add(updateQuestion);
+    _questionsStreamController.add(_questions);
+    return updateQuestion;
   }
 
   Future<int> deleteAllQuestions() async {
+    await _ensureDbIsOpen();
     final db = _getDataBaseOrThrow();
-    return await db.delete(questionsTable);
+    final numberOfDeletions = await db.delete(questionsTable);
+    _questions = [];
+    _questionsStreamController.add(_questions);
+    return numberOfDeletions;
   }
 
   Future<void> deleteQuestion({required int id}) async {
+    await _ensureDbIsOpen();
     final db = _getDataBaseOrThrow();
     final deletedCount = await db.delete(
       questionsTable,
       where: 'id = ?',
       whereArgs: [id],
     );
-    if (deletedCount == 0) throw CouldNotDeleteQuestionException();
+
+    if (deletedCount == 0) {
+      throw CouldNotDeleteQuestionException();
+    } else {
+      _questions.removeWhere((question) => question.id == id);
+      _questionsStreamController.add(_questions);
+    }
   }
 
   Future<DataBaseQuestions> createQuestion(
       {required DataBaseUser owner}) async {
+    await _ensureDbIsOpen();
     final db = _getDataBaseOrThrow();
 
     //make sure owner exists in the db
@@ -84,10 +147,15 @@ class HelperService {
       text: text,
       isSyncedWithCloud: true,
     );
+
+    _questions.add(question);
+    _questionsStreamController.add(_questions);
+
     return question;
   }
 
   Future<DataBaseUser> getUser({required String email}) async {
+    await _ensureDbIsOpen();
     final db = _getDataBaseOrThrow();
 
     final results = await db.query(
@@ -103,6 +171,7 @@ class HelperService {
   }
 
   Future<DataBaseUser> createUser({required String email}) async {
+    await _ensureDbIsOpen();
     final db = _getDataBaseOrThrow();
     final results = await db.query(
       userTable,
@@ -147,6 +216,14 @@ class HelperService {
     }
   }
 
+  Future<void> _ensureDbIsOpen() async {
+    try {
+      await open();
+    } on DatabaseAlreadyOpenedException {
+      //empty
+    }
+  }
+
   Future<void> open() async {
     if (_db != null) throw DatabaseAlreadyOpenedException();
     try {
@@ -158,6 +235,7 @@ class HelperService {
       await db.execute(createUserTable);
       //create the questions table
       await db.execute(createQuestionsTable);
+      await _cacheQuestions();
     } on MissingPlatformDirectoryException {
       throw UnableToGetDocumentsDirectoryException();
     }
@@ -222,7 +300,7 @@ class DataBaseQuestions {
 }
 
 //constants
-const dbName = 'helper.db';
+const dbName = 'helper_data.db';
 const userTable = 'user';
 const questionsTable = 'questions';
 const idColumn = 'id';
