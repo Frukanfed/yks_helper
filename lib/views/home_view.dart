@@ -73,6 +73,7 @@ class _HomeViewState extends State<HomeView> {
                   builder: (context, snapshot) {
                     switch (snapshot.connectionState) {
                       case ConnectionState.waiting:
+                      case ConnectionState.active:
                         return const Text('Waiting Questions');
                       default:
                         return const CircularProgressIndicator();
