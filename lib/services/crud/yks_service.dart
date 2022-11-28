@@ -12,12 +12,19 @@ class HelperService {
 
   List<DataBaseQuestions> _questions = [];
 
-  static final _shared = HelperService._sharedInstance();
-  HelperService._sharedInstance();
+  static final HelperService _shared = HelperService._sharedInstance();
+  HelperService._sharedInstance() {
+    _questionsStreamController =
+        StreamController<List<DataBaseQuestions>>.broadcast(
+      onListen: () {
+        _questionsStreamController.sink.add(_questions);
+      },
+    );
+  }
   factory HelperService() => _shared;
 
-  final _questionsStreamController =
-      StreamController<List<DataBaseQuestions>>.broadcast();
+  late final StreamController<List<DataBaseQuestions>>
+      _questionsStreamController;
 
   Stream<List<DataBaseQuestions>> get allNotes =>
       _questionsStreamController.stream;
@@ -35,7 +42,7 @@ class HelperService {
   }
 
   Future<void> _cacheQuestions() async {
-    final allQuestions = await getSameTypeQuestions(type: 'all');
+    final allQuestions = await getAllQuestions();
     _questions = allQuestions.toList();
     _questionsStreamController.add(_questions);
   }
@@ -64,21 +71,11 @@ class HelperService {
     return updatedQuestion;
   }
 
-  Future<Iterable<DataBaseQuestions>> getSameTypeQuestions(
-      {required String type}) async {
+  Future<Iterable<DataBaseQuestions>> getAllQuestions() async {
     await _ensureDbIsOpen();
     final db = _getDataBaseOrThrow();
     List<Map<String, Object?>> questions;
-
-    if (type == 'all') {
-      questions = await db.query(questionsTable);
-    } else {
-      questions = await db.query(
-        questionsTable,
-        where: 'type = ?',
-        whereArgs: [type],
-      );
-    }
+    questions = await db.query(questionsTable);
 
     return questions
         .map((questionsRow) => DataBaseQuestions.fromRow(questionsRow));
@@ -137,13 +134,11 @@ class HelperService {
     if (dbUser != owner) throw CouldNotFindUserException();
 
     const text = '';
-    const type = '';
-    final questionId = await db.insert(questionsTable,
-        {textColumn: text, typeColumn: type, isSyncedWithCloudColumn: 1});
+    final questionId = await db
+        .insert(questionsTable, {textColumn: text, isSyncedWithCloudColumn: 1});
 
     final question = DataBaseQuestions(
       id: questionId,
-      type: type,
       text: text,
       isSyncedWithCloud: true,
     );
@@ -270,27 +265,24 @@ class DataBaseUser {
 //implementing questions table
 class DataBaseQuestions {
   final int id;
-  final String type;
   final String text;
   final bool isSyncedWithCloud;
 
   const DataBaseQuestions({
     required this.id,
-    required this.type,
     required this.text,
     required this.isSyncedWithCloud,
   });
 
   DataBaseQuestions.fromRow(Map<String, Object?> map)
       : id = map[idColumn] as int,
-        type = map[typeColumn] as String,
         text = map[textColumn] as String,
         isSyncedWithCloud =
             (map[isSyncedWithCloudColumn] as int) == 1 ? true : false;
 
   @override
   String toString() =>
-      'Questions, id = $id, type = $type, isSyncedWithCloud = $isSyncedWithCloud, text = $text';
+      'Questions, id = $id, isSyncedWithCloud = $isSyncedWithCloud, text = $text';
 
   @override
   bool operator ==(covariant DataBaseQuestions other) => id == other.id;
@@ -305,7 +297,6 @@ const userTable = 'user';
 const questionsTable = 'questions';
 const idColumn = 'id';
 const emailColumn = 'email';
-const typeColumn = 'type';
 const textColumn = 'text';
 const isSyncedWithCloudColumn = 'is_synced_with_cloud';
 const createUserTable = ''' CREATE TABLE IF NOT EXISTS "user" (
@@ -315,7 +306,6 @@ const createUserTable = ''' CREATE TABLE IF NOT EXISTS "user" (
       ); ''';
 const createQuestionsTable = ''' CREATE TABLE IF NOT EXISTS "questions" (
         "id"	INTEGER NOT NULL,
-        "branch"	TEXT NOT NULL,
         "is_synced_with_cloud"	INTEGER,
         "text"	TEXT,
         PRIMARY KEY("id" AUTOINCREMENT)

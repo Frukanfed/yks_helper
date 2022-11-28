@@ -24,7 +24,9 @@ class _NewQuestionViewState extends State<NewQuestionView> {
 
   void _textControllerListener() async {
     final question = _question;
-    if (question == null) return;
+    if (question == null) {
+      return;
+    }
 
     final text = _textEditingController.text;
     await _helperService.updateQuestion(
@@ -41,7 +43,9 @@ class _NewQuestionViewState extends State<NewQuestionView> {
   Future<DataBaseQuestions> createQuestion() async {
     final existingQuestion = _question;
     // if there is already a question, return it
-    if (existingQuestion != null) return existingQuestion;
+    if (existingQuestion != null) {
+      return existingQuestion;
+    }
     // if not, make a new one
     final currentUser = AuthService.firebase().currentUser!;
     final email = currentUser.email!;
@@ -86,6 +90,7 @@ class _NewQuestionViewState extends State<NewQuestionView> {
         builder: (context, snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.done:
+              // ignore: unnecessary_cast
               _question = snapshot.data as DataBaseQuestions?;
               _setupTextControllerListener();
               return TextField(

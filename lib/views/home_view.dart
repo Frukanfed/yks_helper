@@ -22,12 +22,6 @@ class _HomeViewState extends State<HomeView> {
   }
 
   @override
-  void dispose() {
-    _helperService.close();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
@@ -74,7 +68,26 @@ class _HomeViewState extends State<HomeView> {
                     switch (snapshot.connectionState) {
                       case ConnectionState.waiting:
                       case ConnectionState.active:
-                        return const Text('Waiting Questions');
+                        if (snapshot.hasData) {
+                          final allQuestions =
+                              snapshot.data as List<DataBaseQuestions>;
+                          return ListView.builder(
+                            itemCount: allQuestions.length,
+                            itemBuilder: (context, index) {
+                              final question = allQuestions[index];
+                              return ListTile(
+                                title: Text(
+                                  question.text,
+                                  maxLines: 1,
+                                  softWrap: true,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              );
+                            },
+                          );
+                        } else {
+                          return const CircularProgressIndicator();
+                        }
                       default:
                         return const CircularProgressIndicator();
                     }
