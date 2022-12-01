@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:yks_helper/constants/routes.dart';
 import 'package:yks_helper/services/auth/auth_service.dart';
 import 'package:yks_helper/services/crud/yks_service.dart';
+import 'package:yks_helper/views/questions/questions_list_view.dart';
 import '../enums/menu_action.dart';
+import '../utilities//dialogs/logout_dialog.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -37,7 +39,7 @@ class _HomeViewState extends State<HomeView> {
               onSelected: (value) async {
                 switch (value) {
                   case MenuAction.logout:
-                    final shouldLogOut = await showLogOutDialog(context);
+                    final shouldLogOut = await showLogoutDialog(context);
                     if (shouldLogOut) {
                       await AuthService.firebase().logOut();
                       Navigator.of(context).pushNamedAndRemoveUntil(
@@ -71,18 +73,11 @@ class _HomeViewState extends State<HomeView> {
                         if (snapshot.hasData) {
                           final allQuestions =
                               snapshot.data as List<DataBaseQuestions>;
-                          return ListView.builder(
-                            itemCount: allQuestions.length,
-                            itemBuilder: (context, index) {
-                              final question = allQuestions[index];
-                              return ListTile(
-                                title: Text(
-                                  question.text,
-                                  maxLines: 1,
-                                  softWrap: true,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              );
+                          return QuestionsListView(
+                            questions: allQuestions,
+                            onDeleteQuestion: (question) async {
+                              await _helperService.deleteQuestion(
+                                  id: question.id);
                             },
                           );
                         } else {
@@ -99,29 +94,4 @@ class _HomeViewState extends State<HomeView> {
           },
         ));
   }
-}
-
-Future<bool> showLogOutDialog(BuildContext context) {
-  return showDialog<bool>(
-      context: context,
-      builder: ((context) {
-        return AlertDialog(
-          title: const Text('Sign Out'),
-          content: const Text('Are you sure you want to log out?'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(false);
-              },
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(true);
-              },
-              child: const Text('Log Out'),
-            ),
-          ],
-        );
-      })).then((value) => value ?? false);
 }
