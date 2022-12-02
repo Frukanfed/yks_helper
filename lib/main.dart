@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:yks_helper/constants/routes.dart';
 import 'package:yks_helper/services/auth/auth_service.dart';
 import 'package:yks_helper/views/login_view.dart';
-import 'package:yks_helper/views/questions/new_q_view.dart';
+import 'package:yks_helper/views/questions/create_update_q_view.dart';
 import 'package:yks_helper/views/verify_email_view.dart';
 import 'views/register_view.dart';
 import 'views/home_view.dart';
@@ -20,7 +20,8 @@ void main() {
       registerRoute: (context) => const RegisterView(),
       homeRoute: (context) => const HomeView(),
       verifyEmailRoute: (context) => const VerifyEmailView(),
-      newQuestionRoute: (context) => const NewQuestionView(),
+      createOrUpdateQuestionRoute: (context) =>
+          const CreateUpdateQuestionView(),
     },
   ));
 }

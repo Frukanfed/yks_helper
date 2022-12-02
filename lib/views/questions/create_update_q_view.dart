@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:yks_helper/services/auth/auth_service.dart';
 import 'package:yks_helper/services/crud/yks_service.dart';
+import 'package:yks_helper/utilities/generics/get_arguments.dart';
 
-class NewQuestionView extends StatefulWidget {
-  const NewQuestionView({super.key});
+class CreateUpdateQuestionView extends StatefulWidget {
+  const CreateUpdateQuestionView({super.key});
 
   @override
-  State<NewQuestionView> createState() => _NewQuestionViewState();
+  State<CreateUpdateQuestionView> createState() =>
+      _CreateUpdateQuestionViewState();
 }
 
-class _NewQuestionViewState extends State<NewQuestionView> {
+class _CreateUpdateQuestionViewState extends State<CreateUpdateQuestionView> {
   DataBaseQuestions? _question;
   late final HelperService _helperService;
   late final TextEditingController _textEditingController;
@@ -40,7 +41,15 @@ class _NewQuestionViewState extends State<NewQuestionView> {
     _textEditingController.addListener(_textControllerListener);
   }
 
-  Future<DataBaseQuestions> createQuestion() async {
+  Future<DataBaseQuestions> createOrGetQuestion(BuildContext context) async {
+    //get question if passed down to update
+    final widgetQuestion = context.getArgument<DataBaseQuestions>();
+    if (widgetQuestion != null) {
+      _question = widgetQuestion;
+      _textEditingController.text = widgetQuestion.text;
+      return widgetQuestion;
+    }
+
     final existingQuestion = _question;
     // if there is already a question, return it
     if (existingQuestion != null) {
@@ -50,7 +59,9 @@ class _NewQuestionViewState extends State<NewQuestionView> {
     final currentUser = AuthService.firebase().currentUser!;
     final email = currentUser.email!;
     final owner = await _helperService.getUser(email: email);
-    return await _helperService.createQuestion(owner: owner);
+    final newQuestion = await _helperService.createQuestion(owner: owner);
+    _question = newQuestion;
+    return newQuestion;
   }
 
   void _deleteQuestionIfTextIsEmpty() {
@@ -86,12 +97,10 @@ class _NewQuestionViewState extends State<NewQuestionView> {
         title: const Text('Yeni Soru'),
       ),
       body: FutureBuilder(
-        future: createQuestion(),
+        future: createOrGetQuestion(context),
         builder: (context, snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.done:
-              // ignore: unnecessary_cast
-              _question = snapshot.data as DataBaseQuestions?;
               _setupTextControllerListener();
               return TextField(
                 controller: _textEditingController,

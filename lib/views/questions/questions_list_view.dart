@@ -2,16 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:yks_helper/services/crud/yks_service.dart';
 import '../../utilities/dialogs/delete_dialog.dart';
 
-typedef DeleteQuestionCallback = void Function(DataBaseQuestions question);
+typedef QuestionCallback = void Function(DataBaseQuestions question);
 
 class QuestionsListView extends StatelessWidget {
   final List<DataBaseQuestions> questions;
-  final DeleteQuestionCallback onDeleteQuestion;
+  final QuestionCallback onDeleteQuestion;
+  final QuestionCallback onTap;
 
   const QuestionsListView({
     super.key,
     required this.questions,
     required this.onDeleteQuestion,
+    required this.onTap,
   });
 
   @override
@@ -21,6 +23,9 @@ class QuestionsListView extends StatelessWidget {
       itemBuilder: (context, index) {
         final question = questions[index];
         return ListTile(
+          onTap: () {
+            onTap(question);
+          },
           title: Text(
             question.text,
             maxLines: 1,

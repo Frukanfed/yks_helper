@@ -31,7 +31,7 @@ class _HomeViewState extends State<HomeView> {
           actions: [
             IconButton(
               onPressed: () {
-                Navigator.of(context).pushNamed(newQuestionRoute);
+                Navigator.of(context).pushNamed(createOrUpdateQuestionRoute);
               },
               icon: const Icon(Icons.add),
             ),
@@ -78,6 +78,12 @@ class _HomeViewState extends State<HomeView> {
                             onDeleteQuestion: (question) async {
                               await _helperService.deleteQuestion(
                                   id: question.id);
+                            },
+                            onTap: (question) {
+                              Navigator.of(context).pushNamed(
+                                createOrUpdateQuestionRoute,
+                                arguments: question,
+                              );
                             },
                           );
                         } else {
