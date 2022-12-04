@@ -65,7 +65,7 @@ class _HomeViewState extends State<HomeView> {
             switch (snapshot.connectionState) {
               case ConnectionState.done:
                 return StreamBuilder(
-                  stream: _helperService.allNotes,
+                  stream: _helperService.allQuestions,
                   builder: (context, snapshot) {
                     switch (snapshot.connectionState) {
                       case ConnectionState.waiting:

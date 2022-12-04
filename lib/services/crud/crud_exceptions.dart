@@ -14,4 +14,6 @@ class CouldNotDeleteQuestionException implements Exception {}
 
 class CouldNotFindQuestionException implements Exception {}
 
-class CouldNotUpdateNoteException implements Exception {}
+class CouldNotUpdateQuestionException implements Exception {}
+
+class UserShouldBeSetBeforeReadingAllQuestionsException implements Exception {}
