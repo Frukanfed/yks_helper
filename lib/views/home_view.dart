@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:yks_helper/constants/routes.dart';
 import 'package:yks_helper/services/auth/auth_service.dart';
-import 'package:yks_helper/services/crud/yks_service.dart';
+import 'package:yks_helper/services/auth/firebase_auth_provider.dart';
+import 'package:yks_helper/services/cloud/cloud_question.dart';
+import 'package:yks_helper/services/cloud/firebase_cloud_storage.dart';
 import 'package:yks_helper/views/questions/questions_list_view.dart';
 import '../enums/menu_action.dart';
 import '../utilities//dialogs/logout_dialog.dart';
@@ -14,12 +16,12 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
-  late final HelperService _helperService;
-  String get userEmail => AuthService.firebase().currentUser!.email!;
+  late final FirebaseCloudStorage _helperService;
+  String get userId => AuthService.firebase().currentUser!.id;
 
   @override
   void initState() {
-    _helperService = HelperService();
+    _helperService = FirebaseCloudStorage();
     super.initState();
   }
 
@@ -59,41 +61,30 @@ class _HomeViewState extends State<HomeView> {
             )
           ],
         ),
-        body: FutureBuilder(
-          future: _helperService.getOrCreateUser(email: userEmail),
+        body: StreamBuilder(
+          stream: _helperService.allQuestions(ownerUserId: userId),
           builder: (context, snapshot) {
             switch (snapshot.connectionState) {
-              case ConnectionState.done:
-                return StreamBuilder(
-                  stream: _helperService.allQuestions,
-                  builder: (context, snapshot) {
-                    switch (snapshot.connectionState) {
-                      case ConnectionState.waiting:
-                      case ConnectionState.active:
-                        if (snapshot.hasData) {
-                          final allQuestions =
-                              snapshot.data as List<DataBaseQuestions>;
-                          return QuestionsListView(
-                            questions: allQuestions,
-                            onDeleteQuestion: (question) async {
-                              await _helperService.deleteQuestion(
-                                  id: question.id);
-                            },
-                            onTap: (question) {
-                              Navigator.of(context).pushNamed(
-                                createOrUpdateQuestionRoute,
-                                arguments: question,
-                              );
-                            },
-                          );
-                        } else {
-                          return const CircularProgressIndicator();
-                        }
-                      default:
-                        return const CircularProgressIndicator();
-                    }
-                  },
-                );
+              case ConnectionState.waiting:
+              case ConnectionState.active:
+                if (snapshot.hasData) {
+                  final allQuestions = snapshot.data as Iterable<CloudQuestion>;
+                  return QuestionsListView(
+                    questions: allQuestions,
+                    onDeleteQuestion: (question) async {
+                      await _helperService.deleteQuestion(
+                          documentId: question.documentId);
+                    },
+                    onTap: (question) {
+                      Navigator.of(context).pushNamed(
+                        createOrUpdateQuestionRoute,
+                        arguments: question,
+                      );
+                    },
+                  );
+                } else {
+                  return const CircularProgressIndicator();
+                }
               default:
                 return const CircularProgressIndicator();
             }

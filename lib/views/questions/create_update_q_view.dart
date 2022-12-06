@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:yks_helper/services/auth/auth_service.dart';
-import 'package:yks_helper/services/crud/yks_service.dart';
 import 'package:yks_helper/utilities/generics/get_arguments.dart';
+import 'package:yks_helper/services/cloud/cloud_question.dart';
+import 'package:yks_helper/services/cloud/cloud_storage_exceptions.dart';
+import 'package:yks_helper/services/cloud/firebase_cloud_storage.dart';
 
 class CreateUpdateQuestionView extends StatefulWidget {
   const CreateUpdateQuestionView({super.key});
@@ -12,13 +14,13 @@ class CreateUpdateQuestionView extends StatefulWidget {
 }
 
 class _CreateUpdateQuestionViewState extends State<CreateUpdateQuestionView> {
-  DataBaseQuestions? _question;
-  late final HelperService _helperService;
+  CloudQuestion? _question;
+  late final FirebaseCloudStorage _helperService;
   late final TextEditingController _textEditingController;
 
   @override
   void initState() {
-    _helperService = HelperService();
+    _helperService = FirebaseCloudStorage();
     _textEditingController = TextEditingController();
     super.initState();
   }
@@ -30,8 +32,8 @@ class _CreateUpdateQuestionViewState extends State<CreateUpdateQuestionView> {
     }
 
     final text = _textEditingController.text;
-    await _helperService.updateQuestion(
-      question: question,
+    await _helperService.updateQuestions(
+      documentId: question.documentId,
       text: text,
     );
   }
@@ -41,9 +43,9 @@ class _CreateUpdateQuestionViewState extends State<CreateUpdateQuestionView> {
     _textEditingController.addListener(_textControllerListener);
   }
 
-  Future<DataBaseQuestions> createOrGetQuestion(BuildContext context) async {
+  Future<CloudQuestion> createOrGetQuestion(BuildContext context) async {
     //get question if passed down to update
-    final widgetQuestion = context.getArgument<DataBaseQuestions>();
+    final widgetQuestion = context.getArgument<CloudQuestion>();
     if (widgetQuestion != null) {
       _question = widgetQuestion;
       _textEditingController.text = widgetQuestion.text;
@@ -57,9 +59,9 @@ class _CreateUpdateQuestionViewState extends State<CreateUpdateQuestionView> {
     }
     // if not, make a new one
     final currentUser = AuthService.firebase().currentUser!;
-    final email = currentUser.email!;
-    final owner = await _helperService.getUser(email: email);
-    final newQuestion = await _helperService.createQuestion(owner: owner);
+    final userId = currentUser.id;
+    final newQuestion =
+        await _helperService.createNewQuestion(ownerUserId: userId);
     _question = newQuestion;
     return newQuestion;
   }
@@ -67,7 +69,7 @@ class _CreateUpdateQuestionViewState extends State<CreateUpdateQuestionView> {
   void _deleteQuestionIfTextIsEmpty() {
     final question = _question;
     if (_textEditingController.text.isEmpty && question != null) {
-      _helperService.deleteQuestion(id: question.id);
+      _helperService.deleteQuestion(documentId: question.documentId);
     }
   }
 
@@ -75,8 +77,8 @@ class _CreateUpdateQuestionViewState extends State<CreateUpdateQuestionView> {
     final question = _question;
     final text = _textEditingController.text;
     if (question != null && text.isNotEmpty) {
-      await _helperService.updateQuestion(
-        question: question,
+      await _helperService.updateQuestions(
+        documentId: question.documentId,
         text: text,
       );
     }

@@ -39,23 +39,25 @@ class FirebaseCloudStorage {
             isEqualTo: ownerUserId,
           )
           .get()
-          .then((value) => value.docs.map((doc) {
-                return CloudQuestion(
-                  documentId: doc.id,
-                  ownerUserId: doc.data()[ownerUserIdFieldName] as String,
-                  text: doc.data()[textFieldName] as String,
-                );
-              }));
+          .then((value) =>
+              value.docs.map((doc) => CloudQuestion.fromSnapshot(doc)));
     } catch (e) {
       throw CouldNotGetAllQuestionException();
     }
   }
 
-  void createNewQuestion({required String ownerUserId}) async {
-    await questions.add({
+  Future<CloudQuestion> createNewQuestion({required String ownerUserId}) async {
+    final document = await questions.add({
       ownerUserIdFieldName: ownerUserId,
       textFieldName: '',
     });
+
+    final fetchetNote = await document.get();
+    return CloudQuestion(
+      documentId: fetchetNote.id,
+      ownerUserId: ownerUserId,
+      text: '',
+    );
   }
 
   static final FirebaseCloudStorage _shared =

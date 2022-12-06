@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:yks_helper/services/crud/yks_service.dart';
+import 'package:yks_helper/services/cloud/cloud_question.dart';
 import '../../utilities/dialogs/delete_dialog.dart';
 
-typedef QuestionCallback = void Function(DataBaseQuestions question);
+typedef QuestionCallback = void Function(CloudQuestion question);
 
 class QuestionsListView extends StatelessWidget {
-  final List<DataBaseQuestions> questions;
+  final Iterable<CloudQuestion> questions;
   final QuestionCallback onDeleteQuestion;
   final QuestionCallback onTap;
 
@@ -21,7 +21,7 @@ class QuestionsListView extends StatelessWidget {
     return ListView.builder(
       itemCount: questions.length,
       itemBuilder: (context, index) {
-        final question = questions[index];
+        final question = questions.elementAt(index);
         return ListTile(
           onTap: () {
             onTap(question);
