@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart' show ReadContext;
 import 'package:yks_helper/constants/routes.dart';
 import 'package:yks_helper/services/auth/auth_service.dart';
-import 'package:yks_helper/services/auth/firebase_auth_provider.dart';
+import 'package:yks_helper/services/auth/bloc/auth_bloc.dart';
+import 'package:yks_helper/services/auth/bloc/auth_events.dart';
 import 'package:yks_helper/services/cloud/cloud_question.dart';
 import 'package:yks_helper/services/cloud/firebase_cloud_storage.dart';
 import 'package:yks_helper/views/questions/questions_list_view.dart';
@@ -43,7 +45,8 @@ class _HomeViewState extends State<HomeView> {
                   case MenuAction.logout:
                     final shouldLogOut = await showLogoutDialog(context);
                     if (shouldLogOut) {
-                      await AuthService.firebase().logOut();
+                      if (!mounted) return;
+                      context.read<AuthBloc>().add(const AuthEventLogOut());
                       Navigator.of(context).pushNamedAndRemoveUntil(
                         loginRoute,
                         (_) => false,
