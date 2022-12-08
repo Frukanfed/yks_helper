@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:yks_helper/services/auth/auth_service.dart';
 import 'package:yks_helper/utilities/generics/get_arguments.dart';
 import 'package:yks_helper/services/cloud/cloud_question.dart';
 import 'package:yks_helper/services/cloud/cloud_storage_exceptions.dart';
 import 'package:yks_helper/services/cloud/firebase_cloud_storage.dart';
+
+import '../../utilities/dialogs/cannot_share_empty_q_dialog.dart';
 
 class CreateUpdateQuestionView extends StatefulWidget {
   const CreateUpdateQuestionView({super.key});
@@ -97,6 +100,19 @@ class _CreateUpdateQuestionViewState extends State<CreateUpdateQuestionView> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Yeni Soru'),
+        actions: [
+          IconButton(
+            onPressed: () async {
+              final text = _textEditingController.text;
+              if (_question == null || text.isEmpty) {
+                await showCannotShareEmptyQuestionsDialog(context);
+              } else {
+                Share.share(text);
+              }
+            },
+            icon: const Icon(Icons.share),
+          ),
+        ],
       ),
       body: FutureBuilder(
         future: createOrGetQuestion(context),
