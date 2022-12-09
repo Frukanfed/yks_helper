@@ -47,10 +47,6 @@ class _HomeViewState extends State<HomeView> {
                     if (shouldLogOut) {
                       if (!mounted) return;
                       context.read<AuthBloc>().add(const AuthEventLogOut());
-                      Navigator.of(context).pushNamedAndRemoveUntil(
-                        loginRoute,
-                        (_) => false,
-                      );
                     }
                     break;
                 }

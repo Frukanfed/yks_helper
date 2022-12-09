@@ -7,8 +7,8 @@ import 'package:yks_helper/services/auth/bloc/auth_state.dart';
 import 'package:yks_helper/services/auth/firebase_auth_provider.dart';
 import 'package:yks_helper/views/login_view.dart';
 import 'package:yks_helper/views/questions/create_update_q_view.dart';
+import 'package:yks_helper/views/register_view.dart';
 import 'package:yks_helper/views/verify_email_view.dart';
-import 'views/register_view.dart';
 import 'views/home_view.dart';
 
 void main() {
@@ -23,10 +23,6 @@ void main() {
       child: const HomePage(),
     ),
     routes: {
-      loginRoute: (context) => const LoginView(),
-      registerRoute: (context) => const RegisterView(),
-      homeRoute: (context) => const HomeView(),
-      verifyEmailRoute: (context) => const VerifyEmailView(),
       createOrUpdateQuestionRoute: (context) =>
           const CreateUpdateQuestionView(),
     },
@@ -47,6 +43,8 @@ class HomePage extends StatelessWidget {
           return const VerifyEmailView();
         } else if (state is AuthStateLoggedOut) {
           return const LoginView();
+        } else if (state is AuthStateRegistering) {
+          return const RegisterView();
         } else {
           return const Scaffold(
             body: CircularProgressIndicator(),
