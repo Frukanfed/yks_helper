@@ -6,6 +6,7 @@ import 'package:yks_helper/services/auth/bloc/auth_bloc.dart';
 import 'package:yks_helper/services/auth/bloc/auth_events.dart';
 import 'package:yks_helper/services/auth/bloc/auth_state.dart';
 import 'package:yks_helper/services/auth/firebase_auth_provider.dart';
+import 'package:yks_helper/views/forget_password_view.dart';
 import 'package:yks_helper/views/login_view.dart';
 import 'package:yks_helper/views/questions/create_update_q_view.dart';
 import 'package:yks_helper/views/register_view.dart';
@@ -54,6 +55,8 @@ class HomePage extends StatelessWidget {
           return const VerifyEmailView();
         } else if (state is AuthStateLoggedOut) {
           return const LoginView();
+        } else if (state is AuthStateForgetPassword) {
+          return const ForgetPasswordView();
         } else if (state is AuthStateRegistering) {
           return const RegisterView();
         } else {

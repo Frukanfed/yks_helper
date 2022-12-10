@@ -38,7 +38,10 @@ class _LoginViewState extends State<LoginView> {
         if (state is AuthStateLoggedOut) {
           if (state.exception is UserNotFoundAuthException ||
               state.exception is WrongPasswordAuthException) {
-            await showErrorDialog(context, 'Wrong Credentials');
+            await showErrorDialog(
+              context,
+              'Cannot find a user with the entered credentials!',
+            );
           } else if (state.exception is EmptyEmailOrPassswordAuthException) {
             await showErrorDialog(context, 'Email or Password can\'t be empty');
           } else if (state.exception is InvalidEmailAuthException) {
@@ -50,43 +53,56 @@ class _LoginViewState extends State<LoginView> {
       },
       child: Scaffold(
         appBar: AppBar(title: const Text('Login')),
-        body: Column(
-          children: [
-            TextField(
-              controller: _email,
-              enableSuggestions: false,
-              autocorrect: false,
-              keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(
-                hintText: 'E-mail',
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              const Text('Please enter your email and password'),
+              TextField(
+                controller: _email,
+                enableSuggestions: false,
+                autocorrect: false,
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(
+                  hintText: 'E-mail',
+                ),
               ),
-            ),
-            TextField(
-              controller: _password,
-              obscureText: true,
-              enableSuggestions: false,
-              autocorrect: false,
-              decoration: const InputDecoration(
-                hintText: 'Password',
+              TextField(
+                controller: _password,
+                obscureText: true,
+                enableSuggestions: false,
+                autocorrect: false,
+                decoration: const InputDecoration(
+                  hintText: 'Password',
+                ),
               ),
-            ),
-            TextButton(
-              onPressed: () async {
-                final email = _email.text;
-                final password = _password.text;
-                context.read<AuthBloc>().add(AuthEventLogIn(
-                      email,
-                      password,
-                    ));
-              },
-              child: const Text('Login'),
-            ),
-            TextButton(
+              TextButton(
+                onPressed: () async {
+                  final email = _email.text;
+                  final password = _password.text;
+                  context.read<AuthBloc>().add(AuthEventLogIn(
+                        email,
+                        password,
+                      ));
+                },
+                child: const Text('Login'),
+              ),
+              TextButton(
                 onPressed: () {
                   context.read<AuthBloc>().add(const AuthEventShouldRegister());
                 },
-                child: const Text('Not registered yet? Register here!'))
-          ],
+                child: const Text('Not registered yet? Register here!'),
+              ),
+              TextButton(
+                onPressed: () {
+                  context.read<AuthBloc>().add(
+                        const AuthEventForgetPassword(null),
+                      );
+                },
+                child: const Text('Forget Password?'),
+              )
+            ],
+          ),
         ),
       ),
     );
