@@ -26,25 +26,11 @@ class FirebaseCloudStorage {
   }
 
   Stream<Iterable<CloudQuestion>> allQuestions({required String ownerUserId}) =>
-      questions.snapshots().map((event) => event.docs
-          .map((doc) => CloudQuestion.fromSnapshot(doc))
-          .where((question) => question.ownerUserId == ownerUserId));
-
-  Future<Iterable<CloudQuestion>> getQuestions(
-      {required String ownerUserId}) async {
-    try {
-      return await questions
-          .where(
-            ownerUserIdFieldName,
-            isEqualTo: ownerUserId,
-          )
-          .get()
-          .then((value) =>
-              value.docs.map((doc) => CloudQuestion.fromSnapshot(doc)));
-    } catch (e) {
-      throw CouldNotGetAllQuestionException();
-    }
-  }
+      questions
+          .where(ownerUserIdFieldName, isEqualTo: ownerUserId)
+          .snapshots()
+          .map((event) =>
+              event.docs.map((doc) => CloudQuestion.fromSnapshot(doc)));
 
   Future<CloudQuestion> createNewQuestion({required String ownerUserId}) async {
     final document = await questions.add({
