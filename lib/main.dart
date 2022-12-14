@@ -12,10 +12,13 @@ import 'package:yks_helper/views/questions/create_update_q_view.dart';
 import 'package:yks_helper/views/register_view.dart';
 import 'package:yks_helper/views/verify_email_view.dart';
 import 'views/home_view.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(MaterialApp(
+    supportedLocales: AppLocalizations.supportedLocales,
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
     debugShowCheckedModeBanner: false,
     title: 'Flutter Demo',
     theme: ThemeData(

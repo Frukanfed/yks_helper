@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:yks_helper/extensions/buildcontext/loc.dart';
 import 'package:yks_helper/utilities/dialogs/generic_dialog.dart';
 
 Future<void> showErrorDialog(
@@ -7,10 +8,10 @@ Future<void> showErrorDialog(
 ) {
   return showGenericDialog<void>(
     context: context,
-    title: 'An error occured.',
+    title: context.loc.generic_error_prompt,
     content: text,
     optionBuilder: () => {
-      'OK': null,
+      context.loc.ok: null,
     },
   );
 }

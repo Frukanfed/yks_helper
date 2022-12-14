@@ -1,0 +1,60 @@
+{
+    "logout_button": "Çıkış Yap",
+    "note": "Not",
+    "cancel": "İptal",
+    "yes": "Evet",
+    "delete": "Sil",
+    "sharing": "Paylaşma",
+    "ok": "Tamam",
+    "login": "Giriş Yap",
+    "verify_email": "Emaili Doğrula",
+    "register": "Kayıt Ol",
+    "restart": "Geri dön",
+
+    "start_typing_your_note": "Notunu buraya yaz",
+    "delete_note_prompt": "Bu notu silmek istediğine emin misin?",
+    "cannot_share_empty_note_prompt": "Boş bir sayfayı paylaşamazsın!",
+    "generic_error_prompt": "Bir hata oluştu",
+    "logout_dialog_prompt": "Çıkış yapmak istediğine emin misin?",
+
+    "password_reset": "Şifreyi Sıfırla",
+    "password_reset_dialog_prompt": "Size bir şifre sıfırlama emaili gönderdik. Lütfen daha fazla bilgi için mailinizi kontrol edin.",
+
+    "login_error_cannot_find_user": "Bu bilgilere sahip bir kullanıcı bulunamadı!",
+    "login_error_wrong_credentials": "Yanlış bilgiler",
+    "login_error_auth_error": "Kimlik doğrulama hatası",
+
+    "login_view_prompt": "Not yazmak ve etkileşime geçebilmek için giriş yapın!",
+    
+    "login_view_forgot_password": "Şifremi unuttum",
+    "login_view_not_registered_yet": "Kayıtlı değil misin? Buradan kaydol!",
+
+    "email_text_field_placeholder": "Emailinizi girin",
+    "password_text_field_placeholder": "Şifrenizi girin",
+    
+    "forgot_password": "Şifremi unuttum",
+    "forgot_password_view_generic_error": "İsteğini gerçekleştiremedik. Lütfen kayıtlı bir kullanıcı olduğunuza emin olun, değilseniz bir adım geri giderek kaydolun.",
+    "forgot_password_view_prompt": "Şifrenizi unuttuysanız emailinizi girin ve şifre sıfırlama emaili gönderelim.",
+    "forgot_password_view_send_me_link": "Emaili Gönder",
+    "forgot_password_view_back_to_login": "Giriş Sayfasına Dön",
+
+    "register_error_weak_password": "Bu şifre yeterince güvenli değil. Lütfen başka bir şifre seçin!",
+    "register_error_email_already_in_use": "Bu email başka bir kullanıcıya kayıtlı. Lütfen başka bir email seçin!",
+    "register_error_generic": "Kayıt olma işlemi başarısız. Lütfen daha sonra deneyin!",
+    "register_error_invalid_email": "Girilen email adresi geçersiz. Lütfen geçerli bir email adresi yazın!",
+    "register_view_prompt": "Email ve şifrenizi girerek notlarınıza erişebilirsiniz!",
+    "register_view_already_registered": "Zaten kayıtlı mısın? Buradan giriş yap!",
+
+    "verify_email_view_prompt": "Size bir doğrulama maili gönderdik. Hesabınızı doğrulamak için lütfen açın ve butona tıklayın. Eğer email gelmediyse aşağıdaki tuşa basın!",
+    "verify_email_send_email_verification": "Doğrulama Maili Gönder",
+
+    "notes_title": "{count, plural, =0{No notes yet} =1{1 note} other{{count} notes}}",
+    "@notes_title": {
+        "placeholders": {
+            "count": {
+                "type": "int",
+                "example": "3 notes"
+            }
+        }
+    }
+}

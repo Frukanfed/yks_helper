@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart' show ReadContext;
 import 'package:yks_helper/constants/routes.dart';
+import 'package:yks_helper/extensions/buildcontext/loc.dart';
 import 'package:yks_helper/services/auth/auth_service.dart';
 import 'package:yks_helper/services/auth/bloc/auth_bloc.dart';
 import 'package:yks_helper/services/auth/bloc/auth_events.dart';
@@ -9,6 +10,10 @@ import 'package:yks_helper/services/cloud/firebase_cloud_storage.dart';
 import 'package:yks_helper/views/questions/questions_list_view.dart';
 import '../enums/menu_action.dart';
 import '../utilities//dialogs/logout_dialog.dart';
+
+extension Count<T extends Iterable> on Stream<T> {
+  Stream<int> get getLength => map((event) => event.length);
+}
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -31,7 +36,17 @@ class _HomeViewState extends State<HomeView> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text('Soruların'),
+          title: StreamBuilder<Object>(
+              stream:
+                  _helperService.allQuestions(ownerUserId: userId).getLength,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  final noteCount = snapshot.data ?? 0;
+                  return Text(context.loc.notes_title(noteCount as int));
+                } else {
+                  return const Text('');
+                }
+              }),
           actions: [
             IconButton(
               onPressed: () {
@@ -52,9 +67,10 @@ class _HomeViewState extends State<HomeView> {
                 }
               },
               itemBuilder: (context) {
-                return const [
+                return [
                   PopupMenuItem<MenuAction>(
-                      value: MenuAction.logout, child: Text('Log Out'))
+                      value: MenuAction.logout,
+                      child: Text(context.loc.logout_button))
                 ];
               },
             )
